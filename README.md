@@ -1,63 +1,42 @@
-# API Deteksi Stunting Balita (JavaScript / Vercel Serverless)
+# 👶 API Deteksi Stunting Balita (Public & Free Serverless)
 
-API Publik berbasis Machine Learning untuk mendeteksi status gizi balita (*Normal*, *Tinggi*, *Stunted*, atau *Severely Stunted*) berdasarkan usia, tinggi badan, dan jenis kelamin.
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?logo=vercel&style=flat-square)](https://api-stunting-js-eosin.vercel.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Runtime: Node.js](https://img.shields.io/badge/Runtime-Node.js%20Native-informational?logo=node.js&style=flat-square)](https://nodejs.org/)
+[![CORS: Enabled](https://img.shields.io/badge/CORS-Enabled%20(Public)-brightgreen?style=flat-square)](https://api-stunting-js-eosin.vercel.app/)
 
-Model *Decision Tree* dari scikit-learn telah di-rewrite sepenuhnya ke dalam **Native JavaScript** sehingga dapat dideploy ke **Vercel Serverless Function** secara **100% Gratis**, tanpa memerlukan runtime Python/C++, dengan latensi eksekusi super cepat (< 1 milidetik).
+API Publik berbasis Machine Learning (*Decision Tree Classifier*) untuk mendeteksi status gizi balita: **Normal**, **Tinggi**, **Stunted (Pendek)**, atau **Severely Stunted (Sangat Pendek)** berdasarkan usia dalam bulan, tinggi badan (cm), dan jenis kelamin.
+
+Model machine learning telah di-rewrite dari Python ke **Native JavaScript** dan di-deploy ke **Vercel Serverless Function** sehingga beroperasi **100% Gratis**, berlatensi eksekusi super cepat (< 2 milidetik), dan siap diintegrasikan langsung ke aplikasi mobile (Flutter/Android/iOS), web, maupun sistem IoT posyandu.
 
 ---
 
-## Keunggulan Versi JavaScript (Vercel)
+## 🌐 Live Production URL
 
-| Fitur | Versi Python (FastAPI Sebelumnya) | Versi JavaScript Native (Baru) |
+| Layanan | URL Publik | Deskripsi |
 |---|---|---|
-| **Platform Target** | Server VPS / Docker / Container | Vercel Serverless (Hobby Plan Free) |
-| **Biaya Hosting** | Berbayar untuk VPS / Container | **100% Gratis** |
-| **Cold Start** | 3.000 - 8.000 ms (Muat Scikit-learn) | **< 5 ms (Instan)** |
-| **Kecepatan Inferensi**| ~1 ms | **~0.0005 ms (0.5 mikrodetik)** |
-| **Ukuran Bundle** | ~200 MB (Python + Sklearn + Scipy) | **< 100 KB (Pure JS + JSON Tree)** |
-| **CORS** | Perlu konfigurasi manual | **Sudah include CORS (Akses Publik Bebas)** |
-| **Web UI Testing** | Swagger UI biasa | **Modern Interactive Web UI included** |
+| **Web UI Playground** | [https://api-stunting-js-eosin.vercel.app/](https://api-stunting-js-eosin.vercel.app/) | Antarmuka web interaktif untuk uji coba live di browser |
+| **Endpoint Prediksi Utama** | `https://api-stunting-js-eosin.vercel.app/api/predict` | Endpoint `POST` prediksi status gizi |
+| **Endpoint Prediksi (Alias)** | `https://api-stunting-js-eosin.vercel.app/predict` | Jalur alternatif yang di-rewrite otomatis |
+| **Health Check & Info** | `https://api-stunting-js-eosin.vercel.app/api` | Info status layanan dan spesifikasi API |
 
 ---
 
-## Struktur Proyek
+## 📋 Spesifikasi Endpoint Prediksi
 
-```
-model_stunting_ver_js/
-├── api/
-│   ├── predict.js          # Vercel Serverless Function: POST /api/predict
-│   └── index.js            # Vercel Serverless Function: GET /api
-├── lib/
-│   ├── predictor.js        # Engine inferensi Decision Tree JavaScript
-│   └── model_tree.json     # Data pohon keputusan (2.067 node hasil ekstraksi)
-├── public/
-│   └── index.html          # Web UI interaktif & playground testing API
-├── datasets/               # Dataset CSV asli
-├── model/                  # File pkl asli (Python) & model_tree.json
-├── server.js               # Web server lokal untuk testing offline (0 dependencies)
-├── test_predict.js         # Script automated unit test
-├── vercel.json             # Konfigurasi routing & header CORS Vercel
-├── .vercelignore           # Filter file agar deployment Vercel super ringan (<100KB)
-└── package.json            # Manifest Node.js
-```
-
----
-
-## Endpoint API
-
-### 1. Prediksi Status Gizi Balita
-
-- **URL:** `/api/predict` (atau alias `/predict`)
+- **Endpoint:** `/api/predict` (atau `/predict`)
 - **Method:** `POST`
-- **Content-Type:** `application/json`
+- **Headers:** `Content-Type: application/json`
+- **Authentication:** None (Public Access)
+- **CORS:** Diaktifkan untuk semua origin (`*`)
 
-#### Request Body
+### 1. Request Body Schema
 
-| Field | Tipe | Wajib | Deskripsi |
-|---|---|---|---|
-| `umur_bulan` | `number` | Ya | Usia balita dalam bulan (contoh: `30`) |
-| `tinggi_badan_cm` | `number` | Ya | Tinggi badan balita dalam cm (contoh: `85.0`) |
-| `jenis_kelamin_encoded` | `number` / `string` | Ya | `0` untuk laki-laki, `1` untuk perempuan. <br>*(Bisa juga mengirimkan string `"laki-laki"` atau `"perempuan"`)* |
+| Parameter | Tipe Data | Wajib | Rentang Nilai | Deskripsi & Contoh |
+|---|---|---|---|---|
+| `umur_bulan` | `number` | **Ya** | `0` – `60` | Usia anak balita dalam bulan. Contoh: `30` |
+| `tinggi_badan_cm` | `number` | **Ya** | `30.0` – `150.0` | Tinggi badan balita dalam centimeter. Contoh: `85.0` |
+| `jenis_kelamin_encoded` | `number` / `string` | **Ya** | `0` atau `1` | `0` = Laki-laki, `1` = Perempuan. *(Bisa juga mengirimkan string `"laki-laki"` / `"perempuan"` pada parameter `jenis_kelamin`)* |
 
 #### Contoh Request JSON:
 ```json
@@ -68,16 +47,19 @@ model_stunting_ver_js/
 }
 ```
 
-#### Contoh Response JSON (HTTP 200 OK):
+---
+
+### 2. Response Schema (HTTP 200 OK)
+
 ```json
 {
   "prediction_label": "stunted",
-  "confidence_score": 1.0,
+  "confidence_score": 1,
   "probabilities": {
-    "normal": 0.0,
-    "severely stunted": 0.0,
-    "stunted": 1.0,
-    "tinggi": 0.0
+    "normal": 0,
+    "severely stunted": 0,
+    "stunted": 1,
+    "tinggi": 0
   },
   "input": {
     "umur_bulan": 30,
@@ -88,86 +70,37 @@ model_stunting_ver_js/
 }
 ```
 
-> **Catatan Kompatibilitas:** Field `prediction_label` dan `confidence_score` 100% identik dengan API FastAPI lama, sehingga aplikasi mobile atau web yang sudah ada tidak perlu mengubah kode parsing hasil.
+#### Penjelasan Field Response:
+* **`prediction_label`** *(string)*: Hasil klasifikasi akhir status gizi balita:
+  * `"normal"` : Status gizi normal sesuai kurva pertumbuhan.
+  * `"tinggi"` : Balita memiliki tinggi badan di atas rata-rata usianya.
+  * `"stunted"` : Mengalami stunting / tubuh pendek (kurang gizi kronis).
+  * `"severely stunted"` : Mengalami stunting tingkat berat (sangat pendek).
+* **`confidence_score`** *(number, 0.0 – 1.0)*: Tingkat keyakinan / probabilitas tertinggi model atas prediksi yang diberikan.
+* **`probabilities`** *(object)*: Rincian persentase sebaran probabilitas untuk seluruh 4 kelas klasifikasi.
+* **`input`** *(object)*: Data input yang berhasil diparsing dan dinormalisasi oleh sistem.
 
 ---
 
-### 2. Interactive Web UI & API Health
+### 3. Response Error Schema (HTTP 400 Bad Request)
 
-- **URL:** `/`
-- **Method:** `GET`
-- **Deskripsi:** Menampilkan halaman web responsif dengan kalkulator prediksi interaktif, visualisasi probabilitas, dan dokumentasi cuplikan kode.
+Jika data input tidak valid atau parameter wajib tidak dikirimkan, API akan memberikan respon `400 Bad Request` yang informatif tanpa membuat server crash:
 
----
-
-## Menjalankan Secara Lokal (Offline)
-
-Anda dapat menguji API ini di komputer lokal tanpa perlu koneksi internet:
-
-### 1. Jalankan Unit Test:
-```bash
-node test_predict.js
+```json
+{
+  "error": "Umur (bulan) harus berupa angka positif."
+}
 ```
-*Output akan memverifikasi 5 skenario status gizi dengan akurasi 100%.*
 
-### 2. Jalankan Server Lokal:
+---
+
+## 💻 Contoh Integrasi Kode Klien
+
+Berikut contoh siap pakai untuk memanggil API ini dari berbagai bahasa pemrograman dan framework:
+
+### 1. cURL (Terminal / Command Prompt)
 ```bash
-node server.js
-```
-Akses di browser: `http://localhost:3000`
-
----
-
-## Cara Deploy ke Vercel (Gratis & Publik)
-
-Ada dua cara mudah untuk mendeploy proyek ini ke Vercel:
-
-### Opsi A: Deploy via GitHub (Direkomendasikan)
-
-1. Buat repository baru di [GitHub](https://github.com/new) (misal: `stunting-api-js`).
-2. Masukkan dan push source code ke repository Anda:
-   ```bash
-   git add .
-   git commit -m "feat: rewrite stunting model to javascript serverless"
-   git remote add origin https://github.com/<username-anda>/<nama-repo>.git
-   git branch -M main
-   git push -u origin main
-   ```
-3. Buka dashboard [Vercel](https://vercel.com) dan login (bisa login dengan akun GitHub).
-4. Klik tombol **"Add New..."** &rarr; **"Project"**.
-5. Pilih repository GitHub Anda, lalu klik **"Deploy"**.
-6. Selesai! Dalam ~20 detik, Vercel akan memberikan domain publik gratis dengan SSL HTTPS aktif:
-   ```
-   https://stunting-api-js.vercel.app
-   ```
-
----
-
-### Opsi B: Deploy Langsung via Vercel CLI
-
-1. Buka terminal di folder proyek ini.
-2. Jalankan perintah Vercel:
-   ```bash
-   npx vercel
-   ```
-3. Ikuti panduan interaktif di terminal:
-   - *Set up and deploy?* &rarr; ketik `y` lalu Enter.
-   - *Which scope?* &rarr; pilih akun Anda.
-   - *Link to existing project?* &rarr; ketik `n`.
-   - *What's your project's name?* &rarr; tekan Enter (default).
-   - *In which directory is your code located?* &rarr; tekan Enter (`./`).
-4. Untuk deployment versi production publik:
-   ```bash
-   npx vercel --prod
-   ```
-
----
-
-## Contoh Kode Integrasi Klien
-
-### 1. cURL (Terminal / Postman)
-```bash
-curl -X POST "https://<your-vercel-domain>.vercel.app/api/predict" \
+curl -X POST "https://api-stunting-js-eosin.vercel.app/api/predict" \
   -H "Content-Type: application/json" \
   -d '{
     "umur_bulan": 30,
@@ -176,65 +109,193 @@ curl -X POST "https://<your-vercel-domain>.vercel.app/api/predict" \
   }'
 ```
 
-### 2. JavaScript / TypeScript (React, Vue, Next.js, HTML)
-```javascript
-const response = await fetch('https://<your-vercel-domain>.vercel.app/api/predict', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    umur_bulan: 30,
-    tinggi_badan_cm: 85.0,
-    jenis_kelamin_encoded: 0 // 0: laki-laki, 1: perempuan
-  })
-});
+---
 
-const data = await response.json();
-console.log('Status Gizi:', data.prediction_label);
-console.log('Confidence:', data.confidence_score);
+### 2. JavaScript / TypeScript (Fetch API di React, Vue, Next.js, atau HTML)
+```javascript
+async function checkStunting() {
+  const response = await fetch('https://api-stunting-js-eosin.vercel.app/api/predict', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      umur_bulan: 30,
+      tinggi_badan_cm: 85.0,
+      jenis_kelamin_encoded: 0 // 0: laki-laki, 1: perempuan
+    })
+  });
+
+  const data = await response.json();
+  
+  if (response.ok) {
+    console.log('Status Gizi:', data.prediction_label);
+    console.log('Keyakinan:', (data.confidence_score * 100) + '%');
+  } else {
+    console.error('Error:', data.error);
+  }
+}
+
+checkStunting();
 ```
 
-### 3. Flutter / Dart (Aplikasi Mobile)
+---
+
+### 3. Flutter / Dart (Aplikasi Mobile Android & iOS)
+Tambahkan `http` ke `pubspec.yaml`, lalu panggil fungsi berikut:
+
 ```dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-Future<void> checkStunting() async {
-  final url = Uri.parse('https://<your-vercel-domain>.vercel.app/api/predict');
-  final res = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'umur_bulan': 30,
-      'tinggi_badan_cm': 85.0,
-      'jenis_kelamin_encoded': 0,
-    }),
-  );
+Future<void> predictStunting() async {
+  final url = Uri.parse('https://api-stunting-js-eosin.vercel.app/api/predict');
 
-  if (res.statusCode == 200) {
-    final data = jsonDecode(res.body);
-    print('Status: ${data["prediction_label"]}');
-    print('Skor: ${data["confidence_score"]}');
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'umur_bulan': 30,
+        'tinggi_badan_cm': 85.0,
+        'jenis_kelamin_encoded': 0, // 0: Laki-laki, 1: Perempuan
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      String status = jsonResponse['prediction_label'];
+      num score = jsonResponse['confidence_score'];
+
+      print('Hasil Status Gizi: $status');
+      print('Confidence Score: ${(score * 100).toStringAsFixed(1)}%');
+    } else {
+      print('Request gagal: ${response.body}');
+    }
+  } catch (e) {
+    print('Kesalahan koneksi: $e');
   }
 }
 ```
 
-### 4. Python (Requests)
+---
+
+### 4. Kotlin (Android Native dengan Retrofit / OkHttp)
+```kotlin
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+
+fun cekStunting() {
+    val client = OkHttpClient()
+    val json = """
+        {
+            "umur_bulan": 30,
+            "tinggi_badan_cm": 85.0,
+            "jenis_kelamin_encoded": 0
+        }
+    """.trimIndent()
+
+    val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+    val request = Request.Builder()
+        .url("https://api-stunting-js-eosin.vercel.app/api/predict")
+        .post(body)
+        .build()
+
+    client.newCall(request).execute().use { response ->
+        if (response.isSuccessful) {
+            println("Response: " + response.body?.string())
+        }
+    }
+}
+```
+
+---
+
+### 5. Python (Requests Library)
 ```python
 import requests
 
-url = "https://<your-vercel-domain>.vercel.app/api/predict"
+url = "https://api-stunting-js-eosin.vercel.app/api/predict"
 payload = {
     "umur_bulan": 30,
     "tinggi_badan_cm": 85.0,
     "jenis_kelamin_encoded": 0
 }
-res = requests.post(url, json=payload)
-print(res.json())
+
+response = requests.post(url, json=payload)
+data = response.json()
+
+print(f"Status Gizi : {data['prediction_label']}")
+print(f"Confidence  : {data['confidence_score'] * 100:.1f}%")
 ```
 
 ---
 
-## Lisensi
-MIT License. Bebas digunakan untuk keperluan riset, skripsi, maupun pengembangan aplikasi kesehatan masyarakat.
+### 6. PHP / Laravel (Guzzle HTTP / Http Facade)
+```php
+use Illuminate\Support\Facades\Http;
+
+$response = Http::post('https://api-stunting-js-eosin.vercel.app/api/predict', [
+    'umur_bulan' => 30,
+    'tinggi_badan_cm' => 85.0,
+    'jenis_kelamin_encoded' => 0
+]);
+
+if ($response->successful()) {
+    $result = $response->json();
+    echo "Status: " . $result['prediction_label'];
+    echo "Skor  : " . $result['confidence_score'];
+}
+```
+
+---
+
+## 🛠️ Pengujian Manual Secara Lokal (Offline)
+
+Anda juga dapat menjalankan dan menguji model ini di komputer lokal tanpa internet:
+
+### 1. Menjalankan Tes Cepat via CLI Terminal
+```bash
+node cli.js 30 85 0
+```
+*Output menampilkan status gizi, confidence score, dan grafik distribusi probabilitas di terminal.*
+
+### 2. Menjalankan Server Lokal
+```bash
+node server.js
+```
+Buka browser di `http://localhost:3000` untuk membuka Web UI Playground lokal.
+
+### 3. Menjalankan Unit Test Otomatis
+```bash
+node test_predict.js
+```
+*Menguji 5 skenario kondisi gizi balita dengan akurasi 100%.*
+
+---
+
+## 📁 Struktur Repositori
+
+```
+├── api/
+│   ├── predict.js          # Serverless function endpoint: POST /api/predict
+│   └── index.js            # Serverless function info: GET /api
+├── lib/
+│   ├── predictor.js        # Engine inferensi Decision Tree JavaScript
+│   └── model_tree.json     # Struktur pohon keputusan (2.067 node hasil ekstraksi)
+├── public/
+│   └── index.html          # Web UI playground & dokumentasi live interaktif
+├── cli.js                  # Tool CLI untuk pengujian instan lewat terminal
+├── server.js               # Server lokal (0 dependencies) untuk testing offline
+├── test_predict.js         # Script automated unit testing
+├── vercel.json             # Konfigurasi routing rewrite & header CORS Vercel
+├── .vercelignore           # Filter file agar deployment Vercel super cepat (<100KB)
+└── package.json            # Konfigurasi manifest Node.js
+```
+
+---
+
+## 📜 Lisensi
+Proyek ini dilisensikan di bawah **MIT License**. Bebas digunakan untuk keperluan penelitian, skripsi, prototipe, maupun integrasi sistem kesehatan masyarakat.
