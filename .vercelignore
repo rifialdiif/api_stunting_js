@@ -1,0 +1,11 @@
+# File dan folder yang tidak perlu diunggah ke Vercel
+datasets/
+__pycache__/
+*.pyc
+*.pkl
+Dockerfile
+requirements.txt
+main.py
+.git/
+test_predict.js
+

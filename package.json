@@ -1,0 +1,26 @@
+{
+  "name": "stunting-prediction-api",
+  "version": "2.0.0",
+  "description": "Public Serverless API untuk Prediksi Status Gizi Stunting Balita berbasis Machine Learning Native JavaScript di Vercel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test_predict.js"
+  },
+  "keywords": [
+    "stunting",
+    "machine-learning",
+    "decision-tree",
+    "vercel",
+    "serverless",
+    "javascript",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Deteksi Stunting Balita - Vercel Serverless ML</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .gradient-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
+  
+  <!-- Header / Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-indigo-500/30 text-white">
+          S
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white">StuntingAI API</h1>
+          <p class="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Public & Gratis di Vercel Serverless
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-xs">
+        <span class="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">
+          Decision Tree Engine
+        </span>
+        <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          Latency: &lt; 2ms
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full space-y-8">
+    <div class="text-center max-w-2xl mx-auto space-y-3">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+        Prediksi Status Gizi Balita
+      </h2>
+      <p class="text-slate-400 text-sm sm:text-base">
+        Model Machine Learning berbasis Decision Tree yang telah di-rewrite dalam JavaScript native. 
+        Dapat diintegrasikan langsung ke aplikasi Android, iOS, Website, atau IoT.
+      </p>
+    </div>
+
+    <!-- Playground & Result Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Form Input Form -->
+      <div class="lg:col-span-5 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <h3 class="font-bold text-base text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+            </svg>
+            Uji Coba Langsung (Live Test)
+          </h3>
+          <span class="text-xs text-slate-400">Endpoint: <code class="text-indigo-300">/api/predict</code></span>
+        </div>
+
+        <form id="predictForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Umur Balita (Bulan)</label>
+            <div class="relative">
+              <input type="number" id="umur_bulan" min="0" max="60" step="1" value="30" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+              <span class="absolute right-3.5 top-2.5 text-xs text-slate-400">Bulan</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Rentang balita umumnya: 0 - 60 bulan</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Tinggi Badan (cm)</label>
+            <div class="relative">
+              <input type="number" id="tinggi_badan_cm" min="30" max="150" step="0.1" value="85.0" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+              <span class="absolute right-3.5 top-2.5 text-xs text-slate-400">cm</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Jenis Kelamin</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="gender-btn relative flex items-center justify-center p-3 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 transition has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-600/20">
+                <input type="radio" name="gender" value="0" checked class="sr-only">
+                <span class="text-sm font-semibold">👦 Laki-laki (0)</span>
+              </label>
+              <label class="gender-btn relative flex items-center justify-center p-3 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 transition has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-600/20">
+                <input type="radio" name="gender" value="1" class="sr-only">
+                <span class="text-sm font-semibold">👧 Perempuan (1)</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmit"
+            class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+            <span>Kirim Prediksi ke API</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Result Card -->
+      <div class="lg:col-span-7 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <h3 class="font-bold text-base text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Hasil Output Prediksi
+          </h3>
+          <span id="execTime" class="text-xs text-slate-400">Siap</span>
+        </div>
+
+        <!-- Prediction Badge & Details -->
+        <div id="resultBox" class="space-y-5">
+          <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Klasifikasi Status Gizi</p>
+              <h4 id="resultLabel" class="text-2xl sm:text-3xl font-extrabold capitalize mt-1 text-white">
+                -
+              </h4>
+            </div>
+            <div class="text-center sm:text-right">
+              <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Confidence Score</p>
+              <span id="resultConfidence" class="text-2xl font-mono font-bold text-emerald-400">-</span>
+            </div>
+          </div>
+
+          <!-- Probabilities breakdown -->
+          <div class="space-y-2">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Distribusi Probabilitas Kelas</p>
+            <div id="probList" class="space-y-2">
+              <div class="text-xs text-slate-500">Klik tombol "Kirim Prediksi ke API" untuk melihat hasil.</div>
+            </div>
+          </div>
+
+          <!-- Raw JSON Response -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Format JSON Response API</p>
+              <button onclick="copyJson()" class="text-[11px] text-indigo-400 hover:text-indigo-300">Copy JSON</button>
+            </div>
+            <pre id="rawJson" class="bg-slate-950 p-3.5 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto border border-slate-800">
+{
+  "status": "Silakan jalankan prediksi"
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- API Documentation & Code Snippets -->
+    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3 flex-wrap gap-2">
+        <h3 class="font-bold text-base text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+          </svg>
+          Dokumentasi Integrasi API Publik
+        </h3>
+        <div class="flex gap-2">
+          <button onclick="showSnippet('curl')" class="tab-btn px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white" id="tab-curl">cURL</button>
+          <button onclick="showSnippet('js')" class="tab-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-700 text-slate-300" id="tab-js">JavaScript (Fetch)</button>
+          <button onclick="showSnippet('flutter')" class="tab-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-700 text-slate-300" id="tab-flutter">Flutter / Dart</button>
+          <button onclick="showSnippet('python')" class="tab-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-700 text-slate-300" id="tab-python">Python</button>
+        </div>
+      </div>
+
+      <!-- Code Snippets -->
+      <div class="relative">
+        <pre id="snippetBox" class="bg-slate-950 p-4 rounded-xl text-xs font-mono text-indigo-300 overflow-x-auto border border-slate-800"></pre>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-900/80 py-6 mt-8">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+      <p>Stunting Detection Machine Learning API &bull; Siap deploy di Vercel secara gratis.</p>
+      <div class="flex items-center gap-4">
+        <span>CORS Enabled (Public Access)</span>
+        <span>&bull;</span>
+        <span>High Performance JavaScript</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const snippets = {
+      curl: `curl -X POST "https://<your-vercel-domain>.vercel.app/api/predict" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "umur_bulan": 30,
+    "tinggi_badan_cm": 85.0,
+    "jenis_kelamin_encoded": 0
+  }'`,
+      js: `// Panggilan dari Frontend JavaScript / React / Vue / Next.js
+const response = await fetch('https://<your-vercel-domain>.vercel.app/api/predict', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    umur_bulan: 30,
+    tinggi_badan_cm: 85.0,
+    jenis_kelamin_encoded: 0 // 0: laki-laki, 1: perempuan
+  })
+});
+const data = await response.json();
+console.log('Status Gizi:', data.prediction_label);
+console.log('Confidence:', data.confidence_score);`,
+      flutter: `// Panggilan dari Flutter / Dart (Mobile App)
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> predictStunting() async {
+  final url = Uri.parse('https://<your-vercel-domain>.vercel.app/api/predict');
+  final res = await http.post(
+    url,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'umur_bulan': 30,
+      'tinggi_badan_cm': 85.0,
+      'jenis_kelamin_encoded': 0,
+    }),
+  );
+  final data = jsonDecode(res.body);
+  print('Hasil: \${data["prediction_label"]} (\${data["confidence_score"]})');
+}`,
+      python: `# Panggilan dari Python
+import requests
+
+url = "https://<your-vercel-domain>.vercel.app/api/predict"
+payload = {
+    "umur_bulan": 30,
+    "tinggi_badan_cm": 85.0,
+    "jenis_kelamin_encoded": 0
+}
+res = requests.post(url, json=payload)
+print(res.json())`
+    };
+
+    function showSnippet(type) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-slate-700', 'text-slate-300');
+      });
+      const activeBtn = document.getElementById('tab-' + type);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-indigo-600', 'text-white');
+        activeBtn.classList.remove('bg-slate-700', 'text-slate-300');
+      }
+      document.getElementById('snippetBox').textContent = snippets[type];
+    }
+
+    showSnippet('curl');
+
+    const form = document.getElementById('predictForm');
+    const resultLabel = document.getElementById('resultLabel');
+    const resultConfidence = document.getElementById('resultConfidence');
+    const probList = document.getElementById('probList');
+    const rawJson = document.getElementById('rawJson');
+    const execTime = document.getElementById('execTime');
+
+    const statusColors = {
+      'normal': 'text-emerald-400',
+      'tinggi': 'text-sky-400',
+      'stunted': 'text-amber-400',
+      'severely stunted': 'text-rose-500'
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const umur = parseFloat(document.getElementById('umur_bulan').value);
+      const tinggi = parseFloat(document.getElementById('tinggi_badan_cm').value);
+      const gender = parseInt(document.querySelector('input[name="gender"]:checked').value);
+
+      const payload = {
+        umur_bulan: umur,
+        tinggi_badan_cm: tinggi,
+        jenis_kelamin_encoded: gender
+      };
+
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const duration = (performance.now() - start).toFixed(1);
+        execTime.textContent = `Waktu respon: ${duration} ms`;
+
+        const data = await res.json();
+        rawJson.textContent = JSON.stringify(data, null, 2);
+
+        if (!res.ok) {
+          resultLabel.textContent = 'Error';
+          resultLabel.className = 'text-2xl font-bold text-rose-500';
+          resultConfidence.textContent = '-';
+          probList.innerHTML = `<div class="text-rose-400 text-xs">${data.error || 'Terjadi kesalahan'}</div>`;
+          return;
+        }
+
+        const label = data.prediction_label;
+        resultLabel.textContent = label;
+        resultLabel.className = `text-2xl sm:text-3xl font-extrabold capitalize mt-1 ${statusColors[label] || 'text-white'}`;
+        resultConfidence.textContent = (data.confidence_score * 100).toFixed(0) + '%';
+
+        // Render probabilities
+        probList.innerHTML = '';
+        if (data.probabilities) {
+          for (const [cls, prob] of Object.entries(data.probabilities)) {
+            const pct = (prob * 100).toFixed(1);
+            const isWinner = cls === label;
+            const bar = document.createElement('div');
+            bar.className = 'space-y-1';
+            bar.innerHTML = `
+              <div class="flex justify-between text-xs font-medium">
+                <span class="${isWinner ? 'font-bold text-white' : 'text-slate-400'} capitalize">${cls}</span>
+                <span class="${isWinner ? 'font-bold text-indigo-400' : 'text-slate-500'} font-mono">${pct}%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                <div class="${isWinner ? 'bg-indigo-500' : 'bg-slate-700'} h-2 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+              </div>
+            `;
+            probList.appendChild(bar);
+          }
+        }
+      } catch (err) {
+        resultLabel.textContent = 'Koneksi Gagal';
+        resultLabel.className = 'text-xl font-bold text-rose-500';
+        rawJson.textContent = err.message;
+      }
+    });
+
+    function copyJson() {
+      navigator.clipboard.writeText(rawJson.textContent);
+      alert('JSON hasil berhasil disalin!');
+    }
+
+    // Auto trigger on load
+    form.dispatchEvent(new Event('submit'));
+  </script>
+</body>
+</html>
+
